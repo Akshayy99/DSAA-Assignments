@@ -1,20 +1,14 @@
-boxImage = rgb2gray(imread('F2.jpg'));
-sceneImage = rgb2gray(imread('Faces.jpg'));
-boxPoints = detectSURFFeatures(boxImage);
-scenePoints = detectSURFFeatures(sceneImage);
 
-[boxFeatures, boxPoints] = extractFeatures(boxImage, boxPoints);
-[sceneFeatures, scenePoints] = extractFeatures(sceneImage, scenePoints);
+face = rgb2gray(imread('F1.jpg'));
+faces = rgb2gray(imread('Faces.jpg'));
 
-boxPairs = matchFeatures(boxFeatures, sceneFeatures);
+c = normxcorr2(face, faces);
+% figure, surf(c), shading flat
 
-matchedBoxPoints = boxPoints(boxPairs(:,1), :);
-matchedScenePoints = scenePoints(boxPairs(:, 2), :);
+[ypeak, xpeak] = find(c==max(c(:)));
 
-[tform, inlierBoxPoints, inlierScenePoints] = ...
-    estimateGeometricTransform(matchedBoxPoints, matchedScenePoints, 'affine');
+yoffset = ypeak-size(face,1);
+xoffset = xpeak-size(face,2);
 
-figure;
-showMatchedFeatures(boxImage, sceneImage, inlierBoxPoints, ...
-    inlierScenePoints, 'montage');
-title('Matched Points (Inliers Only)');
+figure, imshow(faces);
+imrect(gca, [xoffset+1,yoffset+1, size(face,2), size(face,1)]);
